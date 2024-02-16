@@ -13,14 +13,29 @@ import numpy as np
 from lib.geo_model_net import make_geo_model_net
 
 
-def _lr_scheduler(epoch, lr):
-    if epoch < 30:
-        return lr
-    else:
-        if epoch % 5 == 0:
-            return lr * tf.math.exp(-0.1)
+class LRLogger(tf.keras.callbacks.Callback):
+    def on_batch_end(self, batch, logs):
+        print()
+        if callable(self.model.optimizer.learning_rate):
+            iters = self.model.optimizer.iterations
+            print("{} iters".format(iters))
+            lr = self.model.optimizer.learning_rate(iters)
         else:
-            return lr
+            lr = float(self.model.optimizer.learning_rate)
+
+        print("{} lr".format(lr))
+        print()
+
+
+    def on_epoch_end(self, epoch, logs):
+        print(epoch)
+        print(logs)
+        print(self.model.optimizer.learning_rate)
+        print(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
+        lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
+        if lr == None:
+            lr = 0.0
+        wandb.log({"lr": lr}, commit=False)
 
 
 class DiscretizedInatGeoModelTrainer:
@@ -79,9 +94,9 @@ class DiscretizedInatGeoModelTrainer:
 
         return ds, num_examples
 
-    def _make_and_compile_model(self, initial_lr, num_classes):
+    def _make_and_compile_model(self, learning_rate, num_classes):
         fcnet = make_geo_model_net(num_classes=num_classes)
-        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=initial_lr)
+        optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=learning_rate)
         bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 
         fcnet.compile(
@@ -132,15 +147,27 @@ class DiscretizedInatGeoModelTrainer:
             batch_size=self.config["batch_size"],
         )
 
-        fcnet = self._make_and_compile_model(
-            initial_lr=float(self.config["initial_lr"]), num_classes=num_leaf_taxa
+        steps_per_epoch = int(np.ceil(num_examples / self.config["batch_size"]))
+        total_steps = steps_per_epoch / self.config["num_epochs"]
+        warmup_steps = total_steps * 0.1
+        decay_steps = total_steps - warmup_steps
+
+        lr_scheduler = tf.keras.optimizers.schedules.CosineDecay(
+            initial_learning_rate=1e-7,
+            decay_steps=decay_steps,
+            warmup_target=self.config["initial_lr"],
+            warmup_steps=warmup_steps
         )
 
-        steps_per_epoch = np.ceil(num_examples / self.config["batch_size"])
+        fcnet = self._make_and_compile_model(
+            learning_rate=lr_scheduler,
+            num_classes=num_leaf_taxa
+        )
 
         callbacks = [
-            tf.keras.callbacks.LearningRateScheduler(_lr_scheduler, verbose=1),
             tf.keras.callbacks.TensorBoard(TENSORBOARD_LOGDIR),
+            LRLogger(),
+            WandbMetricsLogger(log_freq=5),
         ]
 
         history = fcnet.fit(
