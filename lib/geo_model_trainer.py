@@ -93,6 +93,11 @@ class DiscretizedInatGeoModelTrainer:
         return fcnet
 
     def train_geomodel(self):
+        wandb.init(
+            project="geomode_tf",
+            config=self.config
+        )
+
         tax = pd.read_csv(os.path.join(self.config["export_dir"], "taxonomy.csv"))
         leaf_tax = tax[~tax.leaf_class_id.isna()]
         num_leaf_taxa = len(leaf_tax)
@@ -148,3 +153,5 @@ class DiscretizedInatGeoModelTrainer:
         print(history.history)
 
         fcnet.save(MODEL_SAVE_FILE)
+
+        wandb.finish()
