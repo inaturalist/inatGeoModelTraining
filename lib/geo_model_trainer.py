@@ -109,7 +109,7 @@ class DiscretizedInatGeoModelTrainer:
 
     def train_geomodel(self):
         wandb.init(
-            project="geomode_tf",
+            project=self.config["wandb_project"],
             config=self.config
         )
 

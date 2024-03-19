@@ -30,6 +30,7 @@ def main():
         "shuffle_buffer_size": 50_000,
         "full_shuffle_before_tfrecords": False,
         "lr_warmup_cosine_decay": True,
+        "wandb_project": "geomodel_tf",
     }
 
     ds = DiscretizedInatGeoModelDataset(config=params)
