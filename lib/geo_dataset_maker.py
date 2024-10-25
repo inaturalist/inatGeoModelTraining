@@ -13,7 +13,14 @@ class DiscretizedInatGeoModelDataset:
     def __init__(self, config):
         self.config = config
 
+    def _load_spatial_dataset_parquet(self, path):
+        df = pd.read_parquet(path)
+        return df[["latitude", "longitude", "spatial_class_id", "taxon_id", "community", "captive"]]
+       
     def _load_spatial_dataset(self, path):
+        if path.suffix == ".parquet":
+            return self._load_spatial_dataset_parquet(path)
+
         return pd.read_csv(
             path,
             usecols=[
@@ -277,7 +284,6 @@ class DiscretizedInatGeoModelDataset:
         self.num_leaf_taxa = len(self.leaf_tax)
         self.spatial_train = pd.read_parquet(data_file)
         
-
 
     def make_dataset(self):
         print("loading taxonomy and training data")
