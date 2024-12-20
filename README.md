@@ -16,3 +16,7 @@
 - Two implementation challenges for inference to be aware of
   - If you’re getting elevation from a different source, such as an iPhone barometer, you may get different elevations than we used at training time, since bioclim maps the world to a single continuous surface. So if you’re underground or in the air, ymmv
   - If you’re over the ocean, then you may get wildly different results: bioclim provides an ocean mask for areas in the ocean, with pixels set to -32768. This is what we trained with, but your barometer probably wouldn’t report this when you’re over the ocean. So the geo model may overestimate the likelihood of land taxa and underestimate the likelihood of marine taxa when you’re in the ocean
+
+#### Converting to SINR
+
+We are converting from discretized & gridded training to following [the SINR approach](https://arxiv.org/abs/2306.02564).
