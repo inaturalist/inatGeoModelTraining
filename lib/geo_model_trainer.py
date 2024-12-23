@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 import wandb
-from wandb.keras import WandbMetricsLogger
+from wandb.integration.keras import WandbMetricsLogger
 import pandas as pd
 import tensorflow as tf
 import numpy as np 
@@ -164,7 +164,7 @@ class DiscretizedInatGeoModelTrainer:
         callbacks = [
             tf.keras.callbacks.TensorBoard(TENSORBOARD_LOGDIR),
             LRLogger(),
-            WandbMetricsLogger(log_freq=5),
+            WandbMetricsLogger(log_freq=100),
         ]
 
         history = fcnet.fit(
