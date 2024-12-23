@@ -185,7 +185,7 @@ class DiscretizedInatGeoModelTrainer:
         fcnet = self._make_and_compile_model(
             learning_rate=learning_rate,
             num_classes=num_leaf_taxa,
-            num_input_featus=5
+            num_input_feats=5
         )
 
         callbacks = [
