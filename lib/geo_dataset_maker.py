@@ -289,13 +289,13 @@ class DiscretizedInatGeoModelDataset:
             self.make_dataset_sinr(self.config["dataset_dir"])
 
         print("cleaning spatial training dataset")
-        spatial_train = self._clean_spatial_dataset()
+        self._clean_spatial_dataset()
 
         # should have no nas
         assert self.spatial_train.isna().any().any() == False
         # don't train if cleaning the dataframe changed the number of available taxa
         assert len(self.spatial_train.spatial_class_id.unique()) == self.num_leaf_taxa
-
+        
         print("doing h3 conversion and discretizing dataframe")
         self._convert_to_discretized_h3()
 
