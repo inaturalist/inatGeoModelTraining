@@ -16,14 +16,17 @@ from lib.geo_dataset_maker import DiscretizedInatGeoModelDataset
 
 def main():
     params = {
-        "export_dir": "/data-ssd/alex/datasets/vision-export-20231231060015-aka-2.11",
-        "export_short_version": "2.11",
+        "dataset_type": "inat", # inat or sinr
+        "dataset_dir": "/disk/mnt/data/exports/vision-export-20241206190125-aka-small-2.0",
+        "export_short_version": "small-2",
         "train_only_cid_data": True,
         "train_only_wild_data": False,
         "h3_resolution": 6,
         "num_random_samples": 100_000,
         "elevation_file": "/home/alex/elevation_h3_resolution6.csv",
-        "experiment_dir": "/data-ssd/alex/experiments/geo_prior_tf/2_11",
+        "experiment_dir": "/disk/mnt/data/experiments/geo_prior_tf/small_two",
+        "use_elevation": True,
+        "num_input_feats": 5, # 4 for coords only, 5 with elev, 3 with raw lat coords only
         "batch_size": 1024,
         "num_epochs": 200,
         "initial_lr": 0.0005,
@@ -32,6 +35,8 @@ def main():
         "lr_warmup_cosine_decay": True,
         "wandb_project": "geomodel_tf",
     }
+
+    params["tfrecord_file"] = params["dataset_dir"] + "/" + "geo_spatial_grid_datasets/" + f"r{params['h3_resolution']}_elevation_empty_cells.tf"
 
     ds = DiscretizedInatGeoModelDataset(config=params)
     ds.make_dataset()
