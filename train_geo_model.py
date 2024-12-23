@@ -26,7 +26,6 @@ def main():
         "elevation_file": "/home/alex/elevation_h3_resolution6.csv",
         "experiment_dir": "/disk/mnt/data/experiments/geo_prior_tf/small_two",
         "use_elevation": True,
-        "num_input_feats": 5, # 4 for coords only, 5 with elev, 3 with raw lat coords only
         "batch_size": 1024,
         "num_epochs": 200,
         "initial_lr": 0.0005,

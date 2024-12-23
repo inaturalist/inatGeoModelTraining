@@ -94,8 +94,9 @@ class DiscretizedInatGeoModelTrainer:
 
         return ds, num_examples
 
-    def _make_and_compile_model(self, learning_rate, num_classes):
-        fcnet = make_geo_model_net(num_classes=num_classes)
+    def _make_and_compile_model(self, learning_rate, num_classes, num_input_feats):
+
+        fcnet = make_geo_model_net(num_classes=num_classes, num_input_feats=num_input_feats)
         optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=learning_rate)
         bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 
@@ -160,8 +161,9 @@ class DiscretizedInatGeoModelTrainer:
         )
 
         fcnet = self._make_and_compile_model(
-            learning_rate=lr_scheduler,
-            num_classes=num_leaf_taxa
+            learning_rate=learning_rate,
+            num_classes=num_leaf_taxa,
+            num_input_featus=5
         )
 
         callbacks = [

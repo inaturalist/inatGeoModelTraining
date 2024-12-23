@@ -24,11 +24,11 @@ class ResLayer(tf.keras.layers.Layer):
         return {}
 
 
-def make_geo_model_net(num_classes):
+def make_geo_model_net(num_classes, num_input_feats=5):
     fcnet = tf.keras.models.Sequential(
         [
             tf.keras.layers.Input(
-                5,
+                num_input_feats,
             ),
             # encode_location_layer,
             tf.keras.layers.Dense(
