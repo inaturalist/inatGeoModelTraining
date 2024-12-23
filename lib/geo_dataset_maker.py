@@ -241,16 +241,52 @@ class DiscretizedInatGeoModelDataset:
                 writer.write(example.SerializeToString())
             writer.close()
 
-    def make_dataset(self):
-        print("loading taxonomy")
-        taxonomy_path = Path("/") / self.config["export_dir"] / "taxonomy.csv"
-        self.tax = pd.read_csv(taxonomy_path)
+    def make_dataset_sinr(self, basedir):
+        basedir_path = Path(basedir)
+        tax_file = basedir_path / "geo_prior_train_meta.json"
+        data_file = basedir_path / "geo_prior_train.parquet"
+
+        self.tax = pd.read_json(
+            tax_file
+        )
+        self.tax.reset_index(inplace=True)
+        self.tax.rename({
+            "index": "spatial_class_id",
+        }, inplace=True, axis=1)
+        self.leaf_tax = self.tax 
+        self.num_leaf_taxa = len(self.tax)
+
+        self.spatial_train = pd.read_parquet(data_file)
+       
+        self.spatial_train = pd.merge(
+            self.spatial_train,
+            self.tax,
+            how="left",
+            left_on="taxon_id",
+            right_on="taxon_id",
+        ) 
+
+
+    def make_dataset_inat(self, basedir):
+        basedir_path = Path(basedir)
+        data_file = basedir_path / "spatial_data.parquet"
+        tax_file = basedir_path / "taxonomy.csv"
+        
+        self.tax = pd.read_csv(tax_file)
         self.leaf_tax = self.tax[~self.tax.leaf_class_id.isna()]
         self.num_leaf_taxa = len(self.leaf_tax)
+        self.spatial_train = pd.read_parquet(data_file)
+        
 
-        print("loading spatial training dataset")
-        spatial_data_path = Path("/") / self.config["export_dir"] / "spatial_data.csv"
-        self.spatial_train = self._load_spatial_dataset(spatial_data_path)
+
+    def make_dataset(self):
+        print("loading taxonomy and training data")
+        if self.config["dataset_type"] == "inat":
+            print("iNat-style dataset")
+            self.make_dataset_inat(self.config["dataset_dir"])
+        elif self.config["dataset_type"] == "sinr":
+            print("sinr-style dataset")
+            self.make_dataset_sinr(self.config["dataset_dir"])
 
         print("cleaning spatial training dataset")
         spatial_train = self._clean_spatial_dataset()
