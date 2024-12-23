@@ -124,9 +124,16 @@ class DiscretizedInatGeoModelTrainer:
             config=self.config
         )
 
-        tax = pd.read_csv(os.path.join(self.config["export_dir"], "taxonomy.csv"))
-        leaf_tax = tax[~tax.leaf_class_id.isna()]
-        num_leaf_taxa = len(leaf_tax)
+        if self.config["dataset_type"] == "sinr":
+            sinr_train_data_dir = Path(self.config["dataset_dir"])
+            tax = pd.read_json(sinr_train_data_dir / "geo_prior_train_meta.json")
+            leaf_tax = tax
+        elif self.config["dataset_type"] == "inat":
+            train_data_dir = Path(self.config["dataset_dir"])
+            tax = pd.read_csv(train_data_dir / "taxonomy.csv")
+            leaf_tax = tax[~tax.leaf_class_id.isna()]
+
+        num_leaf_taxa = len(leaf_tax) 
 
         EXPERIMENT_DIRNAME = "{}_{}_{}e_{}lr_elev_{}".format(
             self.config["export_short_version"],
