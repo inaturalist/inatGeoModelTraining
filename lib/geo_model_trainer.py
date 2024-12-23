@@ -14,28 +14,32 @@ from lib.geo_model_net import make_geo_model_net
 
 
 class LRLogger(tf.keras.callbacks.Callback):
-    def on_batch_end(self, batch, logs):
-        print()
+    def get_current_learning_rate(self):
         if callable(self.model.optimizer.learning_rate):
             iters = self.model.optimizer.iterations
-            print("{} iters".format(iters))
-            lr = self.model.optimizer.learning_rate(iters)
+            return self.model.optimizer.learning_rate(iters)
         else:
-            lr = float(self.model.optimizer.learning_rate)
+            return float(self.model.optimizer.learning_rate)
 
-        print("{} lr".format(lr))
-        print()
+    def on_batch_end(self, batch, logs):
+        lr = self.get_current_learning_rate()
 
 
     def on_epoch_end(self, epoch, logs):
-        print(epoch)
-        print(logs)
-        print(self.model.optimizer.learning_rate)
-        print(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
-        lr = float(tf.keras.backend.get_value(self.model.optimizer.learning_rate))
+        lr = self.get_current_learning_rate()
+        print("epoch {}, lr {}".format(epoch, lr))
         if lr == None:
             lr = 0.0
         wandb.log({"lr": lr}, commit=False)
+
+def _lr_scheduler(epoch, lr):
+    if epoch < 30:
+        return lr
+    else:
+        if epoch % 5 == 0:
+            return lr * tf.math.exp(-0.1)
+        else:
+            return lr
 
 
 class DiscretizedInatGeoModelTrainer:
@@ -143,17 +147,27 @@ class DiscretizedInatGeoModelTrainer:
             batch_size=self.config["batch_size"],
         )
 
+        print("{} examples".format(num_examples))
+        print("{} batch size".format(self.config["batch_size"]))
         steps_per_epoch = int(np.ceil(num_examples / self.config["batch_size"]))
-        total_steps = steps_per_epoch / self.config["num_epochs"]
+        total_steps = steps_per_epoch * self.config["num_epochs"]
         warmup_steps = total_steps * 0.1
         decay_steps = total_steps - warmup_steps
+        print("{} total epochs".format(self.config["num_epochs"]))
+        print("{} steps per epoch".format(steps_per_epoch))
+        print("{} total steps".format(total_steps))
+        print("{} warmup steps".format(warmup_steps))
+        print("{} decay steps".format(decay_steps))
 
-        lr_scheduler = tf.keras.optimizers.schedules.CosineDecay(
-            initial_learning_rate=1e-7,
-            decay_steps=decay_steps,
-            warmup_target=self.config["initial_lr"],
-            warmup_steps=warmup_steps
-        )
+        if self.config.get("lr_warmup_cosine_decay"):	
+            learning_rate = tf.keras.optimizers.schedules.CosineDecay(
+                initial_learning_rate=1e-7,
+                decay_steps=decay_steps,
+                warmup_target=self.config["initial_lr"],
+                warmup_steps=warmup_steps
+            )
+        else:
+            learning_rate = self.config["initial_lr"]
 
         fcnet = self._make_and_compile_model(
             learning_rate=learning_rate,
@@ -166,6 +180,13 @@ class DiscretizedInatGeoModelTrainer:
             LRLogger(),
             WandbMetricsLogger(log_freq=100),
         ]
+
+        if not self.config.get("lr_warmup_cosine_decay"):
+            callbacks.append(
+                tf.keras.callbacks.LearningRateScheduler(
+                    _lr_scheduler, verbose=1
+                )
+            )
 
         history = fcnet.fit(
             dataset,
