@@ -107,7 +107,13 @@ class DiscretizedInatGeoModelTrainer:
         fcnet.compile(
             optimizer=optimizer,
             loss=bce,
-            metrics=["Precision", "Recall"],
+            metrics=[
+                "Precision", 
+                "Recall",
+                tf.keras.metrics.AUC(curve="PR", name="prauc"),
+                tf.keras.metrics.TruePositives(),
+                tf.keras.metrics.FalseNegatives(),
+            ],
         )
 
         return fcnet
