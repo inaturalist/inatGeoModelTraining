@@ -209,8 +209,10 @@ class DiscretizedInatGeoModelDataset:
             )
             return tf_example
 
-        print("  writing tfrecords")
-        with tf.io.TFRecordWriter(self.tfrecord_file) as writer:
+        tfrecord_file = self.config["tfrecord_file"]
+        print(f"  writing tfrecords to {tfrecord_file}")
+        os.makedirs(os.path.dirname(tfrecord_file), exist_ok=True)
+        with tf.io.TFRecordWriter(tfrecord_file) as writer:
             total = len(self.combined_with_elevation)
             i = 0
             for _, row in self.combined_with_elevation.iterrows():
@@ -268,25 +270,11 @@ class DiscretizedInatGeoModelDataset:
             self._combine_spatial_data_with_empties()
         )
 
-        # print("layering in elevation")
+        print("layering in elevation")
         self._combine_spatial_data_elevation()
 
         # still no nas
         assert self.combined_with_elevation.isna().any().any() == False
-
-        # write the tfrecords
-        assert self.config["export_dir"] != None, "we need a valid export dir"
-        assert self.config["export_dir"] != "", "we need a valid export dir"
-
-        os.makedirs(
-            os.path.join(self.config["export_dir"], "geo_spatial_grid_datasets"),
-            exist_ok=True,
-        )
-        self.tfrecord_file = os.path.join(
-            self.config["export_dir"],
-            "geo_spatial_grid_datasets",
-            "r{}_empty_cells_with_elevation.tf".format(self.config["h3_resolution"]),
-        )
 
         if self.config["full_shuffle_before_tfrecords"]:
             self.config("shuffle all data before making tfrecords")

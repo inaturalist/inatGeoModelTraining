@@ -135,14 +135,9 @@ class DiscretizedInatGeoModelTrainer:
         with open(CONFIG_FILE, "w") as fp:
             json.dump(self.config, fp)
 
-        tfrecord_file = os.path.join(
-            self.config["export_dir"],
-            "geo_spatial_grid_datasets",
-            "r{}_empty_cells_with_elevation.tf".format(self.config["h3_resolution"]),
-        )
-
+        print(f"  loading dataset from {self.config['tfrecord_file']}")
         dataset, num_examples = self.make_tfdata_dataset(
-            tfrecord_file=tfrecord_file,
+            tfrecord_file=self.config["tfrecord_file"],
             num_classes=num_leaf_taxa,
             shuffle_buffer_size=self.config["shuffle_buffer_size"],
             batch_size=self.config["batch_size"],
