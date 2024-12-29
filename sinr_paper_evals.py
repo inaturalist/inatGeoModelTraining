@@ -29,8 +29,8 @@ def load_class_to_taxa_sinr_dataset(file):
     print(" extracting taxon_id")
     taxon_ids = spatial_data["taxon_id"].values.astype(int)
 
-    unique_taxa, _ = np.unique(taxon_ids, return_inverse=True)
-    return unique_taxa
+    class_to_taxa, _ = np.unique(taxon_ids, return_inverse=True)
+    return class_to_taxa
 
 @click.command()
 @click.option("--config_file", required=True)
