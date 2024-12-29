@@ -1,0 +1,41 @@
+
+
+### dataset
+dataset_type: "sinr"    # "sinr" or "inat"
+sinr_dataset:
+    train_data: ".../geo_prior_train.parquet"
+inat_dataset:
+    spatial_data: ".../spatial_data.parquet"
+    taxonomy: ".../taxonomy.csv"
+
+### training
+initial_lr: 0.0005
+lr_decay: 0.98
+num_epochs: 10
+batch_size: 2048    
+model_train_strategy: "sinr"    # "sinr" or "grid"
+hard_cap: 10
+subsample_each_epoch: False
+input_type: "coords"            # "coords" or "coords+elev" or "coords+env"
+num_input_feats: 4              # 4 for coords, 5 for coords+elev, etc
+model_save_name: "saved_model.h5"
+log_every_n_steps: 10
+
+sinr_hyperparams:
+    pos_weight: 2048
+
+### eval
+
+sinr_eval:
+    snt_npy_path: ".../snt_res_5.npy"
+    snt_split: "test"
+    snt_val_frac: 0.5
+    
+    iucn_json_path: ".../iucn_res_5.json"
+
+    gp_preds_path: ".../geo_prior_model_preds.npz"
+    gp_meta_path: ".../geo_prior_model_meta.csv" 
+    gp_batch_size: 2048
+
+    gf_data_dir: ".../geo_feature"
+    gf_mask: ".../USA_MASK.tif"
