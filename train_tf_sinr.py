@@ -75,39 +75,43 @@ def apply_gradient(optimizer, model, x, ys, fake_x, pos_weight):
 
 
 def load_inat_dataset_from_parquet(spatial_data_file):
+    print("inat style dataset")
+    print(" reading parquet")
     spatial_data = pd.read_parquet(spatial_data_file)
-    print("extracting locs")
+    spatial_data = spatial_data.dropna(subset="leaf_class_id")
+    print(" extracting locs")
     locs = np.vstack((
         spatial_data["longitude"].values,
         spatial_data["latitude"].values
     )).T.astype(np.float32)
 
-    print(f"extracting taxon_id")
+    print(" extracting taxon_id")
     taxon_ids = spatial_data["taxon_id"].values.astype(int)
     unique_taxa, _ = np.unique(taxon_ids, return_inverse=True)
  
-    printf("extracting spatial class ids")
+    print(" extracting spatial class ids")
     class_ids = spatial_data["spatial_class_id"].values.astype(int)
-    print(f"found {len(unique_taxa)} unique taxa")
+    print(f" found {len(unique_taxa)} unique taxa")
 
     return locs, class_ids, unique_taxa
 
 def load_sinr_dataset_from_parquet(file):
-    print("reading parquet")
+    print("sinr style dataset")
+    print(" reading parquet")
     spatial_data = pd.read_parquet(file)
     
-    print("extracting locs")
+    print(" extracting locs")
     locs = np.vstack((
         spatial_data["longitude"].values, 
         spatial_data["latitude"].values
     )).T.astype(np.float32)
     
-    print("extracting taxon_id")
+    print(" extracting taxon_id")
     taxon_ids = spatial_data["taxon_id"].values.astype(int)
 
-    print("making class_ids")
+    print(" making class_ids")
     unique_taxa, class_ids = np.unique(taxon_ids, return_inverse=True)
-    print(f"found {len(unique_taxa)} unique taxa")
+    print(f" found {len(unique_taxa)} unique taxa")
 
     return locs, class_ids, unique_taxa
 
