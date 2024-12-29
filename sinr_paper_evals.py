@@ -16,8 +16,11 @@ from lib.geo_feat_eval import EvaluatorGeoFeatures
 
 
 def load_class_to_taxa_inat_dataset(taxonomy):
-    assert False, "unimplemented method"
-    pass
+    tax = pd.read_csv(taxonomy)
+    leaf_tax = tax[~tax.leaf_class_id.isna()]
+    leaf_tax = leaf_tax.sort_values("spatial_class_id")
+    class_to_taxa = leaf_tax["taxon_id"].values.astype(int)
+    return class_to_taxa
 
 def load_class_to_taxa_sinr_dataset(file):
     print(" reading parquet")
