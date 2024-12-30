@@ -149,7 +149,13 @@ def train_model(config_file):
     else:
         assert False, f"unsupported dataset type {config['dataset_type']}"
 
-    encoder = CoordEncoder()
+   
+    if config["input_type"] == "coords+env":
+        raster = np.load(config["bioclim_data"]).astype(np.float32)
+    else:
+        raster = None
+    encoder = CoordEncoder(config["input_type"], raster) 
+    
     encoded_locs = encoder.encode(locs)    
     num_classes = len(unique_taxa)
 
