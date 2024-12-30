@@ -99,6 +99,8 @@ def load_inat_dataset_from_parquet(spatial_data_file):
     spatial_data = pd.read_parquet(spatial_data_file)
     spatial_data = clean_dataset(spatial_data)
     spatial_data = spatial_data.dropna(subset="leaf_class_id")
+    print(" shuffling")
+    spatial_data = spatial_data.sample(frac=1)
     print(" extracting locs")
     locs = np.vstack((
         spatial_data["longitude"].values,
@@ -137,7 +139,7 @@ def load_sinr_dataset_from_parquet(file):
     return locs, class_ids, unique_taxa
 
 
-def make_subsampled_dataset(hard_cap, encoded_locs, class_ids, batch_size):
+def make_subsampled_dataset(hard_cap, encoded_locs, class_ids, batch_size, shuffle_buffer_size=None):
     ss_idx = get_idx_subsample_observations(
         class_ids,
         hard_cap=hard_cap
@@ -148,7 +150,12 @@ def make_subsampled_dataset(hard_cap, encoded_locs, class_ids, batch_size):
     ds = tf.data.Dataset.from_tensor_slices(
         (locs_ss, class_ids_ss)
     )
-    ds = ds.shuffle(buffer_size=ds.cardinality())
+
+    if shuffle_buffer_size is None:   
+        ds = ds.shuffle(buffer_size=ds.cardinality())
+    else:
+        ds = ds.shuffle(buffer_size=shuffle_buffer_size)
+
     ds = ds.batch(batch_size)
     ds = ds.prefetch(tf.data.AUTOTUNE)
     return ds, num_train_steps_per_epoch
@@ -193,7 +200,8 @@ def train_model(config_file):
         config["hard_cap"],
         encoded_locs, 
         class_ids, 
-        config["batch_size"]
+        config["batch_size"],
+        config["shuffle_buffer_size"]
     )
     
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
@@ -218,7 +226,8 @@ def train_model(config_file):
                 config["hard_cap"],
                 encoded_locs,
                 class_ids,
-                config["batch_size"]
+                config["batch_size"],
+                config["shuffle_buffer_size"]
             )
 
         pbar = tqdm.tqdm(total=num_train_steps_per_epoch, dynamic_ncols=True)      
