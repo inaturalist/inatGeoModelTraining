@@ -161,7 +161,7 @@ def train_model(config_file):
 
     fcnet = make_geo_model_net(
         num_classes=num_classes,
-        num_input_feats=config["num_input_feats"]
+        num_input_feats=encoder.num_input_feats()
     )
 
     losses = []

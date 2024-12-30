@@ -26,6 +26,12 @@ class CoordEncoder:
             raise NotImplementedError("unknown input encoding")
         return loc_feats
 
+    def num_input_feats(self):
+        if self.raster is not None:
+            return 4 + self.raster.shape[-1]
+        else:
+            return 4
+
     def _normalize_coords(self, locs):
         # locs is in lon {-180, 180}, lat {-90, 90}
         # output is in the range [-1, 1]
