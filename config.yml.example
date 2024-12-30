@@ -17,9 +17,7 @@ model_train_strategy: "sinr"    # "sinr" or "grid"
 hard_cap: 10
 subsample_each_epoch: False
 input_type: "coords"            # "coords" or "coords+elev" or "coords+env"
-num_input_feats: 4              # 4 for coords, 5 for coords+elev, etc
 model_save_name: "saved_model.h5"
-log_every_n_steps: 10
 
 sinr_hyperparams:
     pos_weight: 2048
