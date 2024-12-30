@@ -73,11 +73,31 @@ def apply_gradient(optimizer, model, x, ys, fake_x, pos_weight):
 
     return loss_value, tf.reduce_mean(loss_pos), tf.reduce_mean(loss_bg)
 
+def clean_dataset(data):
+    num_obs = len(data)
+    data = data[(
+        (data['latitude']  <=   90) &
+        (data['latitude']  >=  -90) &
+        (data['longitude'] <=  180) & 
+        (data['longitude'] >= -180)
+    )]
+    if (num_obs - len(data)) > 0:
+        print(f"{num_obs - len(data)} items filtered due to invalid locs")
+    
+    num_obs = len(data)
+    data = data.dropna()
+    if (num_obs - len(data)) > 0:
+        print(f"{num_obs - len(data)} items filtered due to NaN entry")
+   
+    print(f"after cleaning, we have {len(data)} records.") 
+    return data
+
 
 def load_inat_dataset_from_parquet(spatial_data_file):
     print("inat style dataset")
     print(" reading parquet")
     spatial_data = pd.read_parquet(spatial_data_file)
+    spatial_data = clean_dataset(spatial_data)
     spatial_data = spatial_data.dropna(subset="leaf_class_id")
     print(" extracting locs")
     locs = np.vstack((
@@ -99,6 +119,7 @@ def load_sinr_dataset_from_parquet(file):
     print("sinr style dataset")
     print(" reading parquet")
     spatial_data = pd.read_parquet(file)
+    spatial_data = clean_dataset(spatial_data)
     
     print(" extracting locs")
     locs = np.vstack((
