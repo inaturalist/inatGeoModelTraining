@@ -18,7 +18,7 @@ class CoordEncoder:
         elif self.encoding_strategy == "env":
             # sinr strat - we're not using
             raise NotImplementedError("env not implemented")
-        elif self.encoding_strategy == "coords+env":
+        elif self.encoding_strategy in ["coords+env", "coords+elev"]:
             loc_feats = self._encode_loc_sinusoidal(locs)
             context_feats = self._bilinear_interpolate(locs, self.raster)
             loc_feats = np.concatenate((loc_feats, context_feats), 1)

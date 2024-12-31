@@ -197,6 +197,8 @@ def train_model(config_file):
    
     if config["input_type"] == "coords+env":
         raster = np.load(config["bioclim_data"]).astype(np.float32)
+    elif config["input_type"] == "coords+elev":
+        raster = np.load(config["elev_data"]).astype(np.float32)
     else:
         raster = None
     encoder = CoordEncoder(config["input_type"], raster) 
