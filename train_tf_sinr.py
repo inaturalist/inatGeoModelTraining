@@ -82,23 +82,33 @@ def clean_dataset(data):
         (data['longitude'] >= -180)
     )]
     if (num_obs - len(data)) > 0:
-        print(f"{num_obs - len(data)} items filtered due to invalid locs")
+        print(f"  {num_obs - len(data)} items filtered due to invalid locs")
     
     num_obs = len(data)
     data = data.dropna()
     if (num_obs - len(data)) > 0:
-        print(f"{num_obs - len(data)} items filtered due to NaN entry")
+        print(f"  {num_obs - len(data)} items filtered due to NaN entry")
    
-    print(f"after cleaning, we have {len(data)} records.") 
+    print(f"  after cleaning, we have {len(data)} records.") 
     return data
 
 
 def load_inat_dataset_from_parquet(spatial_data_file):
     print("inat style dataset")
     print(" reading parquet")
-    spatial_data = pd.read_parquet(spatial_data_file)
-    spatial_data = clean_dataset(spatial_data)
+    spatial_data = pd.read_parquet(
+        spatial_data_file,
+        columns=[
+            "leaf_class_id",
+            "latitude",
+            "longitude",
+            "taxon_id",
+            "spatial_class_id",
+        ]
+    )
     spatial_data = spatial_data.dropna(subset="leaf_class_id")
+    print(" cleaning dataset")
+    spatial_data = clean_dataset(spatial_data)
     print(" shuffling")
     spatial_data = spatial_data.sample(frac=1)
     print(" extracting locs")
@@ -120,7 +130,14 @@ def load_inat_dataset_from_parquet(spatial_data_file):
 def load_sinr_dataset_from_parquet(file):
     print("sinr style dataset")
     print(" reading parquet")
-    spatial_data = pd.read_parquet(file)
+    spatial_data = pd.read_parquet(
+        file,
+        columns=[
+            "longitude",
+            "latitude",
+            "taxon_id",
+        ]
+    )
     spatial_data = clean_dataset(spatial_data)
     
     print(" extracting locs")
