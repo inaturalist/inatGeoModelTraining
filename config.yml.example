@@ -26,8 +26,14 @@ sinr_hyperparams:
     pos_weight: 2048
 
 ### eval
-
 sinr_eval:
+    # options include "snt", "iucn", "geo_prior", "geo_feat"
+    # iucn in particlar requires a lot of memory
+    evals_to_do:
+        - "snt"
+        - "geo_prior"
+        - "geo_feat"
+
     snt_npy_path: ".../snt_res_5.npy"
     snt_split: "test"
     snt_val_frac: 0.5
