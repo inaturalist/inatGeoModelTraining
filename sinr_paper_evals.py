@@ -53,7 +53,7 @@ def run_eval(config_file):
     enc = CoordEncoder(config["input_type"], raster)
     model = TFGeoPriorModel(config["model_save_name"])
    
-    evals_to_do = ["snt", "iucn", "geo_prior", "geo_feat"]
+    evals_to_do = config["sinr_eval"]["evals_to_do"]
  
     print("loading class to taxa")
     if config["dataset_type"] == "sinr":
