@@ -9,6 +9,7 @@ import pandas as pd
 import tensorflow as tf
 import yaml
 import tqdm
+import wandb
 
 from lib.geo_model_net import make_geo_model_net
 from utils import make_rand_samples, get_idx_subsample_observations
@@ -146,6 +147,11 @@ def train_model(config_file):
     with open(config_file, "r") as f:
         config = yaml.safe_load(f)
 
+    wandb.init(
+        project="geomodel_tf_sinr",
+        config=config
+    )
+
     if config["dataset_type"] == "sinr":
         (locs, class_ids, unique_taxa) = load_sinr_dataset_from_parquet(
             config["sinr_dataset"]["train_data"]
@@ -175,8 +181,6 @@ def train_model(config_file):
     )
 
     losses = []
-    pos_losses = []
-    bg_losses = []
 
     ds, num_train_steps_per_epoch = make_subsampled_dataset(
         config["hard_cap"],
@@ -197,8 +201,6 @@ def train_model(config_file):
     for epoch in range(config["num_epochs"]):    
         print(f"Epoch {epoch+1}")
         epoch_losses = []
-        epoch_pos_losses = []
-        epoch_bg_losses = []
         
         print(f" optimizer lr is {optimizer.learning_rate.numpy()}")
         
@@ -222,7 +224,7 @@ def train_model(config_file):
             )
             rand_loc = encoder.encode(rand_loc, normalize=False)
     
-            (loss, loss_pos, loss_bg) = apply_gradient(
+            loss = apply_gradient(
                 optimizer, 
                 fcnet, 
                 x_batch_train, 
@@ -230,22 +232,26 @@ def train_model(config_file):
                 rand_loc,
                 config["sinr_hyperparams"]["pos_weight"]
             )
-   
+
+            global_step = (epoch * num_train_steps_per_epoch) + step
+            if step % 10 == 0:
+                log_entry = {
+                    "batch_loss": loss,
+                    "learning_rate": optimizer.learning_rate.numpy(),
+                }
+                wandb.log(log_entry, step=global_step, commit=True)
                  
             pbar.set_description(f" Loss {loss:.4f}")
 
             epoch_losses.append(loss.numpy())
-            epoch_pos_losses.append(loss_pos.numpy())
-            epoch_bg_losses.append(loss_bg.numpy())
         
         pbar.close() 
         epoch_loss = np.mean(epoch_losses)
         losses.append(epoch_loss)
-        pos_losses.append(np.mean(epoch_pos_losses))
-        bg_losses.append(np.mean(epoch_bg_losses))
         print(f" Epoch mean loss: {epoch_loss:.4f}")
 
     fcnet.save(config["model_save_name"])
+    wandb.finish()
 
 
 if __name__ == "__main__":
