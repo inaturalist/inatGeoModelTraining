@@ -13,6 +13,7 @@ import tqdm
 from lib.geo_model_net import make_geo_model_net
 from utils import make_rand_samples, get_idx_subsample_observations
 from encoders import CoordEncoder
+from sinr_loss import sinr_loss
 
 
 @tf.function
@@ -26,52 +27,14 @@ def apply_gradient(optimizer, model, x, ys, fake_x, pos_weight):
         # make predictions for the fake/bg training data
         fake_yhat = model(fake_x)
 
-        # start getting the loss for the true training data
-        # neg_log for 1-prediction is large (2.3ish) if the
-        # model predicts it's there, low (approaching zero)
-        # if the model predicts it's not there.
-        # for each lat/lng and taxon pair, we want the model
-        # to predict false for everything other than the target
-        # taxon. this part constructs the loss for the everything
-        # else
-        loss_pos = neg_log(1.0 - yhat)
-        # print("before weighting, loss_poss mean is {}".format(tf.reduce_mean(loss_pos)))
-
-        # now find the indices for the target taxa in the predictions
-        inds = tf.constant(range(len(ys)), dtype="int64")
-        inds = tf.stack([inds, ys], axis=1)
-        # get the predictions for the target taxa
-        pos_preds = tf.gather_nd(yhat, inds)
-        # construct the loss for this term
-        # this will be high (2300) if the model predicts
-        # that it's not there, and low (100s) if the model
-        # predicts it is there. because this dwards the other parts
-        # of the loss, it's what the model will focus on minimizing
-        # if the organism is there, predict that it's there
-        newvals = pos_weight * neg_log(pos_preds)
-
-        # this is tf's way of updating a tensor, not quite in place
-        # since tf will make a new tensor for us by merginig the
-        # initial values of loss_pos with the newvalues at the indices
-        # provided
-        loss_pos = tf.tensor_scatter_nd_update(loss_pos, [inds], [newvals])
-        # print("after weighting, loss_poss mean is {}".format(tf.reduce_mean(loss_pos)))
-
-        # this is the loss for the background data. basically, no matter
-        # what, we want fake_yhat to be as low as possible since it's
-        # made up data
-        loss_bg = neg_log(1.0 - fake_yhat)
-        # print("loss_bg mean is {}".format(tf.reduce_mean(loss_bg)))
-
-        # get the means of the true and bg/fake loss, then sum them
-        loss_value = tf.reduce_mean(loss_pos) + tf.reduce_mean(loss_bg)
+        loss = sinr_loss(ys, yhat, fake_yhat, pos_weight, 1.0)
 
     # do the neural network bits, calculate the gradients and update
     # the model weights
-    gradients = tape.gradient(loss_value, model.trainable_weights)
+    gradients = tape.gradient(loss, model.trainable_weights)
     optimizer.apply_gradients(zip(gradients, model.trainable_weights))
 
-    return loss_value, tf.reduce_mean(loss_pos), tf.reduce_mean(loss_bg)
+    return loss
 
 def clean_dataset(data):
     num_obs = len(data)
