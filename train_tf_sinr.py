@@ -12,7 +12,7 @@ import tqdm
 import wandb
 
 from lib.geo_model_net import make_geo_model_net
-from utils import make_rand_samples, get_idx_subsample_observations
+from utils import make_rand_samples, get_idx_subsample_observations, make_rand_samples_tf   
 from encoders import CoordEncoder
 from sinr_loss import sinr_loss
 
@@ -218,7 +218,7 @@ def train_model(config_file):
         for step, (x_batch_train, y_batch_train) in enumerate(ds):
             pbar.update()
             # make random samples, comes out as list of x,y pairs where x and y are in -1, 1
-            rand_loc = make_rand_samples(
+            rand_loc = make_rand_samples_tf(
                 # make same size fake data as real data
                 len(x_batch_train)
             )

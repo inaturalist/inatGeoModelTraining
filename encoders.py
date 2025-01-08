@@ -35,9 +35,10 @@ class CoordEncoder:
     def _normalize_coords(self, locs):
         # locs is in lon {-180, 180}, lat {-90, 90}
         # output is in the range [-1, 1]
-        norm_locs = locs.copy()
-        norm_locs[:,0] /= 180.0
-        norm_locs[:,1] /= 90.0
+        norm_locs = tf.stack([
+            locs[:, 0] / 180.0,
+            locs[:, 1] / 90.0,
+        ], axis=1)
         return norm_locs
 
     def _encode_loc_sinusoidal(self, loc_ip, concat_dim=1):
@@ -61,10 +62,13 @@ class CoordEncoder:
         assert data is not None
     
         # map to [0,1], then scale to data size
-        loc = (loc_ip.copy() + 1) / 2.0
+        loc = (loc_ip + 1) / 2.0
         # latitude goes from +90 on top to bottom
         # longitude goes from -9i0 to 90 left to right
-        loc[:,1] = 1 - loc[:,1]
+        loc = tf.stack([
+            loc[:, 0],
+            1 - loc[:, 1],
+        ], axis=1)
     
         assert not np.any(np.isnan(loc))
     
@@ -73,8 +77,10 @@ class CoordEncoder:
             data[np.isnan(data)] = 0.0 
     
         # cast locations into pixel space
-        loc[:, 0] *= (data.shape[1]-1)
-        loc[:, 1] *= (data.shape[0]-1)
+        loc = tf.stack([
+            loc[:, 0] * (data.shape[1] - 1),
+            loc[:, 1] * (data.shape[0] - 1),
+        ], axis=1)
    
         # integer pixel coordinates 
         loc_int = np.floor(loc).astype(int)
