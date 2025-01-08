@@ -1,6 +1,18 @@
 import math
 
 import numpy as np
+import tensorflow as tf
+
+PI = tf.constant(math.pi)
+
+def make_rand_samples_tf(batch_size):
+    rand_loc = tf.random.uniform(shape=(batch_size, 2))
+    theta1 = 2.0 * PI * rand_loc[:, 0]
+    theta2 = tf.acos(2.0 * rand_loc[:, 1] - 1.0)
+    lat = 1.0 - 2.0 * theta2 / PI
+    lng = (theta1 / PI) - 1.0
+    return tf.stack([lng, lat], axis=1)
+
 
 def make_rand_samples(batch_size):
     rand_loc = np.random.uniform(size=(batch_size, 2))
