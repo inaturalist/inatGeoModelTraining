@@ -110,9 +110,9 @@ class DiscretizedInatGeoModelDataset:
             index=h3_index_name, values="spatial_class_id", aggfunc=set
         )
 
-        self.spatial_train_h3_dense[
-            "spatial_class_id"
-        ] = self.spatial_train_h3_dense.spatial_class_id.apply(lambda x: list(x))
+        self.spatial_train_h3_dense["spatial_class_id"] = (
+            self.spatial_train_h3_dense.spatial_class_id.apply(lambda x: list(x))
+        )
 
     def _make_random_samples(self):
         def make_samples(batch_size):
@@ -255,17 +255,20 @@ class DiscretizedInatGeoModelDataset:
         data_file = basedir_path / "geo_prior_train.parquet"
 <<<<<<< Updated upstream
 
-        self.tax = pd.read_json(
-            tax_file
-        )
+        self.tax = pd.read_json(tax_file)
         self.tax.reset_index(inplace=True)
-        self.tax.rename({
-            "index": "spatial_class_id",
-        }, inplace=True, axis=1)
-        self.leaf_tax = self.tax 
+        self.tax.rename(
+            {
+                "index": "spatial_class_id",
+            },
+            inplace=True,
+            axis=1,
+        )
+        self.leaf_tax = self.tax
         self.num_leaf_taxa = len(self.tax)
 
         self.spatial_train = pd.read_parquet(data_file)
+<<<<<<< HEAD
        
 =======
         spatial_data = pd.read_parquet(
@@ -283,25 +286,30 @@ class DiscretizedInatGeoModelDataset:
         self.num_leaf_taxa = len(self.tax)
 
 >>>>>>> Stashed changes
+=======
+
+>>>>>>> e7abb63 (organize imports)
         self.spatial_train = pd.merge(
             spatial_data,
             self.tax,
             how="left",
             left_on="taxon_id",
             right_on="taxon_id",
-        ) 
-
+        )
 
     def make_dataset_inat(self, basedir):
         basedir_path = Path(basedir)
         data_file = basedir_path / "spatial_data.parquet"
         tax_file = basedir_path / "taxonomy.csv"
-        
+
         self.tax = pd.read_csv(tax_file)
         self.leaf_tax = self.tax[~self.tax.leaf_class_id.isna()]
         self.num_leaf_taxa = len(self.leaf_tax)
         self.spatial_train = pd.read_parquet(data_file)
+<<<<<<< HEAD
         
+=======
+>>>>>>> e7abb63 (organize imports)
 
     def make_dataset(self):
         print("loading taxonomy and training data")
@@ -319,7 +327,7 @@ class DiscretizedInatGeoModelDataset:
         assert self.spatial_train.isna().any().any() == False
         # don't train if cleaning the dataframe changed the number of available taxa
         assert len(self.spatial_train.spatial_class_id.unique()) == self.num_leaf_taxa
-        
+
         print("doing h3 conversion and discretizing dataframe")
         self._convert_to_discretized_h3()
 

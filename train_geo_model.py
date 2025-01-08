@@ -16,15 +16,10 @@ from lib.geo_dataset_maker import DiscretizedInatGeoModelDataset
 
 def main():
     params = {
-<<<<<<< Updated upstream
         "dataset_type": "inat", # inat or sinr
+        "dataset_type": "inat",  # inat or sinr
         "dataset_dir": "/disk/mnt/data/exports/vision-export-20241206190125-aka-small-2.0",
         "export_short_version": "small-2",
-=======
-        "dataset_type": "inat",  # inat or sinr
-        "dataset_dir": "/data-ssd/alex/datasets/vision-export-20250119070012-aka-2.20",
-        "export_short_version": "2_20_grid",
->>>>>>> Stashed changes
         "train_only_cid_data": True,
         "train_only_wild_data": False,
         "h3_resolution": 6,
@@ -40,10 +35,6 @@ def main():
         "wandb_project": "geomodel_tf",
         "inner_nodes": False,
     }
-<<<<<<< Updated upstream
-
-    params["tfrecord_file"] = params["dataset_dir"] + "/" + "geo_spatial_grid_datasets/" + f"r{params['h3_resolution']}_elevation_empty_cells.tf"
-=======
     
     if params["inner_nodes"]:
         filename = f"r{params['h3_resolution']}_empty_cells_with_elevation_inner_nodes_duckdb.tf"
@@ -55,7 +46,6 @@ def main():
         "geo_spatial_grid_datasets",
         filename
     )
->>>>>>> Stashed changes
 
     ds = DiscretizedInatGeoModelDataset(config=params)
     ds.make_dataset()
