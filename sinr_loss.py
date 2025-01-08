@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 @tf.function
 def neg_log(x):
     return -tf.math.log(x + 1e-5)
@@ -23,9 +24,7 @@ def sinr_loss(y_true, yhat, yhat_bg, pos_weight, alpha=1.0):
 
     newvals = pos_weight * neg_log(pos_preds)
     loss_pos = tf.tensor_scatter_nd_update(loss_pos, [inds], [newvals])
-    
+
     loss_bg = neg_log(1.0 - yhat_bg)
-    
+
     return tf.reduce_mean(loss_pos) + tf.reduce_mean(loss_bg)
-    
-    

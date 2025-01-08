@@ -4,14 +4,13 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from lib.geo_model_net import ResLayer
+from .geo_model_net import ResLayer
+
 
 class TFGeoPriorModel:
     def __init__(self, model_path):
         self.model = tf.keras.models.load_model(
-            model_path,
-            custom_objects={"ResLayer": ResLayer},
-            compile=False
+            model_path, custom_objects={"ResLayer": ResLayer}, compile=False
         )
 
     def get_loc_emb(self, loc_feat):
@@ -24,6 +23,3 @@ class TFGeoPriorModel:
 
     def predict(self, loc_feat):
         return self.model(loc_feat)
-
-
-

@@ -16,7 +16,7 @@ from lib.geo_dataset_maker import DiscretizedInatGeoModelDataset
 
 def main():
     params = {
-        "dataset_type": "inat", # inat or sinr
+        "dataset_type": "inat",  # inat or sinr
         "dataset_dir": "/disk/mnt/data/exports/vision-export-20241206190125-aka-small-2.0",
         "export_short_version": "small-2",
         "train_only_cid_data": True,
@@ -34,7 +34,12 @@ def main():
         "wandb_project": "geomodel_tf",
     }
 
-    params["tfrecord_file"] = params["dataset_dir"] + "/" + "geo_spatial_grid_datasets/" + f"r{params['h3_resolution']}_elevation_empty_cells.tf"
+    params["tfrecord_file"] = (
+        params["dataset_dir"]
+        + "/"
+        + "geo_spatial_grid_datasets/"
+        + f"r{params['h3_resolution']}_elevation_empty_cells.tf"
+    )
 
     ds = DiscretizedInatGeoModelDataset(config=params)
     ds.make_dataset()
