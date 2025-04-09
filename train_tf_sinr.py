@@ -18,7 +18,9 @@ from sinr_loss import sinr_loss
 from lib.data.data_loader import (
     make_subsampled_dataset,
     load_inat_dataset_from_parquet,
+    load_inat_dataset_from_parquet_h3,
     load_sinr_dataset_from_parquet,
+    load_sinr_dataset_from_parquet_h3,
 )
 
 
@@ -52,16 +54,26 @@ def train_model(config_file):
 
     wandb.init(project="geomodel_tf_sinr", config=config)
 
-    if config["dataset_type"] == "sinr":
-        (locs, class_ids, unique_taxa) = load_sinr_dataset_from_parquet(
-            config["sinr_dataset"]["train_data"]
-        )
-    elif config["dataset_type"] == "inat":
-        (locs, class_ids, unique_taxa) = load_inat_dataset_from_parquet(
-            config["inat_dataset"]["spatial_data"]
-        )
+    if config["sampling"]["discretized_sampling"]:
+        if config["dataset_type"] == "sinr":
+            (locs, class_ids, unique_taxa, h3_idx) = load_sinr_dataset_from_parquet_h3(
+                config["sinr_dataset"]["train_data"],
+                h3_resolution=config["sampling"]["h3_resolution"]
+            )
+        else:
+            (locs, class_ids, unique_taxa, h3_idx) = load_inat_dataset_from_parquet_h3(
+                config["inat_dataset"]["spatial_data"],
+                h3_resolution=config["sampling"]["h3_resolution"]
+            )
     else:
-        assert False, f"unsupported dataset type {config['dataset_type']}"
+        if config["dataset_type"] == "sinr":
+            (locs, class_ids, unique_taxa) = load_sinr_dataset_from_parquet(
+                config["sinr_dataset"]["train_data"]
+            )
+        elif config["dataset_type"] == "inat":
+            (locs, class_ids, unique_taxa) = load_inat_dataset_from_parquet(
+                config["inat_dataset"]["spatial_data"]
+            )
 
     if config["inputs"]["covariates"] == "env":
         raster = np.load(config["bioclim_data"]).astype(np.float32)
@@ -81,13 +93,24 @@ def train_model(config_file):
 
     losses = []
 
-    ds, num_train_steps_per_epoch = make_subsampled_dataset(
-        config["hard_cap"],
-        encoded_locs,
-        class_ids,
-        config["batch_size"],
-        config["shuffle_buffer_size"],
-    )
+    if config["sampling"]["discretized_sampling"]:
+        ds, num_train_steps_per_epoch = make_subsampled_dataset(
+            config["hard_cap"],
+            encoded_locs,
+            class_ids,
+            config["batch_size"],
+            config["shuffle_buffer_size"],
+            h3_idx=h3_idx
+        )
+    else:
+        ds, num_train_steps_per_epoch = make_subsampled_dataset(
+            config["hard_cap"],
+            encoded_locs,
+            class_ids,
+            config["batch_size"],
+            config["shuffle_buffer_size"],
+            h3_idx=None
+        )
 
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
         initial_learning_rate=config["initial_lr"],
