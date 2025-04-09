@@ -46,16 +46,18 @@ class DiscretizedInatGeoModelDataset:
         self.spatial_train = self.spatial_train[
             self.spatial_train.taxon_id.isin(self.leaf_tax.taxon_id.unique())
         ]
+       
+        if "community" in self.spatial_train.columns: 
+            if self.config["train_only_cid_data"]:
+                print("  dropping data without cid")
+                self.spatial_train = self.spatial_train[
+                    self.spatial_train.community == True
+                ]
 
-        if self.config["train_only_cid_data"]:
-            print("  dropping data without cid")
-            self.spatial_train = self.spatial_train[
-                self.spatial_train.community == True
-            ]
-
-        if self.config["train_only_wild_data"]:
-            print("  dropping data that's captive/cultivated")
-            self.spatial_train = self.spatial_train[self.spatial_train.captive == False]
+        if "captive" in self.spatial_train.columns:
+            if self.config["train_only_wild_data"]:
+                print("  dropping data that's captive/cultivated")
+                self.spatial_train = self.spatial_train[self.spatial_train.captive == False]
 
         # rename columns for h3pandas
         self.spatial_train = self.spatial_train.rename(
@@ -250,8 +252,8 @@ class DiscretizedInatGeoModelDataset:
 
     def make_dataset_sinr(self, basedir):
         basedir_path = Path(basedir)
-        tax_file = basedir_path / "geo_prior_train_meta.json"
         data_file = basedir_path / "geo_prior_train.parquet"
+<<<<<<< Updated upstream
 
         self.tax = pd.read_json(
             tax_file
@@ -265,8 +267,24 @@ class DiscretizedInatGeoModelDataset:
 
         self.spatial_train = pd.read_parquet(data_file)
        
+=======
+        spatial_data = pd.read_parquet(
+            data_file,
+            columns=["longitude", "latitude", "taxon_id"]
+        )
+        taxon_ids = spatial_data["taxon_id"].values.astype(int)
+        unique_taxa, class_ids = np.unique(taxon_ids, return_inverse=True)
+        self.tax = pd.DataFrame({
+            "taxon_id": unique_taxa,
+        })
+        self.tax.reset_index(inplace=True)
+        self.tax.rename({"index": "spatial_class_id"}, inplace=True, axis=1)
+        self.leaf_tax = self.tax
+        self.num_leaf_taxa = len(self.tax)
+
+>>>>>>> Stashed changes
         self.spatial_train = pd.merge(
-            self.spatial_train,
+            spatial_data,
             self.tax,
             how="left",
             left_on="taxon_id",
