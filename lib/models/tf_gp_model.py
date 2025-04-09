@@ -23,3 +23,15 @@ class TFGeoPriorModel:
 
     def predict(self, loc_feat):
         return self.model(loc_feat)
+
+    def eval_one_class_from_feats(self, feats, class_of_interest):
+        return tf.keras.activations.sigmoid(
+            tf.matmul(
+                tf.expand_dims(
+                    self.model.layers[5].weights[0][:, class_of_interest],
+                    axis=0
+                ),
+                feats,
+                transpose_b=True
+            )
+        ).numpy()
