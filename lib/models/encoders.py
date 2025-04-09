@@ -13,25 +13,26 @@ class CoordEncoder:
         if normalize:
             locs = self._normalize_coords(locs)
 
-        if self.encoding_strategy == "coords":
-            # sinusoidal encoding
+        if self.encoding_strategy == "sinusoidal":
             loc_feats = self._encode_loc_sinusoidal(locs)
-        elif self.encoding_strategy == "env":
-            # sinr strat - we're not using
-            raise NotImplementedError("env not implemented")
-        elif self.encoding_strategy in ["coords+env", "coords+elev"]:
-            loc_feats = self._encode_loc_sinusoidal(locs)
+        elif self.encoding_strategy == "sinusoidal_hd":
+            loc_feats = self._encode_loc_sinusoidal_hd(locs)
+
+        if self.raster is not None:
             context_feats = self._bilinear_interpolate(locs, self.raster)
             loc_feats = np.concatenate((loc_feats, context_feats), 1)
-        else:
-            raise NotImplementedError("unknown input encoding")
+
         return loc_feats
 
     def num_input_feats(self):
-        if self.raster is not None:
-            return 4 + self.raster.shape[-1]
+        if self.encoding_strategy == "sinusoidal_hd":
+            coord_feats = 14
         else:
-            return 4
+            coord_feats = 4
+        if self.raster is not None:
+            return coord_feats + self.raster.shape[-1]
+        else:
+            return coord_feats
 
     def _normalize_coords(self, locs):
         # locs is in lon {-180, 180}, lat {-90, 90}
@@ -52,6 +53,37 @@ class CoordEncoder:
             [tf.sin(loc_ip * math.pi), tf.cos(loc_ip * math.pi)], axis=concat_dim
         )
         return feats
+
+    def _encode_loc_sinusoidal_hd(self, loc_ip, concat_dim=1):
+        # assumes inputs location are in range -1 to 1
+        # location is lon, lat
+    
+        lat = tf.expand_dims(loc_ip[:,0], 1)
+        lng = tf.expand_dims(loc_ip[:,1], 1)
+
+        feats = tf.concat([
+            lng,
+            lat,
+            
+            tf.sin(lng * math.pi),
+            tf.cos(lng * math.pi), 
+            tf.sin(lat * math.pi), 
+
+            tf.sin(2 * lng * math.pi),
+            tf.cos(2 * lng * math.pi), 
+            tf.sin(2 * lat * math.pi), 
+
+            tf.sin(4 * lng * math.pi),
+            tf.cos(4 * lng * math.pi), 
+            tf.sin(4 * lat * math.pi), 
+
+            tf.sin(8 * lng * math.pi),
+            tf.cos(8 * lng * math.pi), 
+            tf.sin(8 * lat * math.pi), 
+        ], axis=concat_dim)
+
+        return feats
+
 
     def _bilinear_interpolate(self, loc_ip, data, remove_nans_raster=True):
         # this is almost entirely exactly from the sinr paper source

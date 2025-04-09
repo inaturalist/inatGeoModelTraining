@@ -30,9 +30,9 @@ def neg_log(x):
 def apply_gradient(optimizer, model, x, ys, fake_x, pos_weight):
     with tf.GradientTape() as tape:
         # make predictions for the true training data
-        yhat = model(x)
+        yhat = model(x, training=True)
         # make predictions for the fake/bg training data
-        fake_yhat = model(fake_x)
+        fake_yhat = model(fake_x, training=True)
 
         loss = sinr_loss(ys, yhat, fake_yhat, pos_weight, 1.0)
 
@@ -63,13 +63,14 @@ def train_model(config_file):
     else:
         assert False, f"unsupported dataset type {config['dataset_type']}"
 
-    if config["input_type"] == "coords+env":
+    if config["inputs"]["covariates"] == "env":
         raster = np.load(config["bioclim_data"]).astype(np.float32)
-    elif config["input_type"] == "coords+elev":
+    elif config["inputs"]["covariates"] == "elev":
         raster = np.load(config["elev_data"]).astype(np.float32)
     else:
         raster = None
-    encoder = CoordEncoder(config["input_type"], raster)
+
+    encoder = CoordEncoder(config["inputs"]["loc_feat_encoding"], raster)
 
     encoded_locs = encoder.encode(locs)
     num_classes = len(unique_taxa)
