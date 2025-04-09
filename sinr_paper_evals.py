@@ -46,13 +46,13 @@ def run_eval(config_file):
     for device in visible_devices:
         assert device.device_type != "GPU"
 
-    if config["input_type"] == "coords+env":
+    if config["inputs"]["covariates"] == "env":
         raster = np.load(config["bioclim_data"]).astype(np.float32)
-    elif config["input_type"] == "coords+elev":
+    elif config["inputs"]["covariates"] == "elev":
         raster = np.load(config["elev_data"]).astype(np.float32)
     else:
         raster = None
-    enc = CoordEncoder(config["input_type"], raster)
+    enc = CoordEncoder(config["inputs"]["loc_feat_encoding"], raster)
     model = TFGeoPriorModel(config["model_save_name"])
 
     evals_to_do = config["sinr_eval"]["evals_to_do"]
