@@ -10,11 +10,7 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np 
 
-<<<<<<< Updated upstream
 from lib.geo_model_net import make_geo_model_net
-=======
-from .models.geo_model_net import make_geo_model_net
->>>>>>> Stashed changes
 
 
 class LRLogger(tf.keras.callbacks.Callback):
@@ -128,25 +124,16 @@ class DiscretizedInatGeoModelTrainer:
             config=self.config
         )
 
-        if self.config["dataset_type"] == "sinr":
-            sinr_train_data_dir = Path(self.config["dataset_dir"])
-            tax = pd.read_json(sinr_train_data_dir / "geo_prior_train_meta.json")
-            leaf_tax = tax
-        elif self.config["dataset_type"] == "inat":
-            train_data_dir = Path(self.config["dataset_dir"])
-            tax = pd.read_csv(train_data_dir / "taxonomy.csv")
-            leaf_tax = tax[~tax.leaf_class_id.isna()]
+        train_data_dir = Path(self.config["dataset_dir"])
+        tax = pd.read_csv(train_data_dir / "taxonomy.csv")
+        leaf_tax = tax[~tax.leaf_class_id.isna()]
 
-<<<<<<< Updated upstream
-        num_leaf_taxa = len(leaf_tax) 
-=======
         num_leaf_taxa = len(leaf_tax)
         num_taxa = len(tax)
         if self.config["inner_nodes"]:
             num_classes = num_taxa
         else:
             num_classes = num_leaf_taxa
->>>>>>> Stashed changes
 
         EXPERIMENT_DIRNAME = "{}_{}_{}e_{}lr_elev_{}".format(
             self.config["export_short_version"],
@@ -196,13 +183,9 @@ class DiscretizedInatGeoModelTrainer:
             learning_rate = self.config["initial_lr"]
 
         fcnet = self._make_and_compile_model(
-<<<<<<< Updated upstream
-            learning_rate=learning_rate,
-            num_classes=num_leaf_taxa,
+            learning_rate=learning_rate, 
+            num_classes=num_classes, 
             num_input_feats=5
-=======
-            learning_rate=learning_rate, num_classes=num_classes, num_input_feats=5
->>>>>>> Stashed changes
         )
 
         callbacks = [

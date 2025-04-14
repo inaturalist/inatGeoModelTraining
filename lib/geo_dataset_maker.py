@@ -250,47 +250,6 @@ class DiscretizedInatGeoModelDataset:
                 writer.write(example.SerializeToString())
             writer.close()
 
-    def make_dataset_sinr(self, basedir):
-        basedir_path = Path(basedir)
-        data_file = basedir_path / "geo_prior_train.parquet"
-<<<<<<< Updated upstream
-
-        self.tax = pd.read_json(
-            tax_file
-        )
-        self.tax.reset_index(inplace=True)
-        self.tax.rename({
-            "index": "spatial_class_id",
-        }, inplace=True, axis=1)
-        self.leaf_tax = self.tax 
-        self.num_leaf_taxa = len(self.tax)
-
-        self.spatial_train = pd.read_parquet(data_file)
-       
-=======
-        spatial_data = pd.read_parquet(
-            data_file,
-            columns=["longitude", "latitude", "taxon_id"]
-        )
-        taxon_ids = spatial_data["taxon_id"].values.astype(int)
-        unique_taxa, class_ids = np.unique(taxon_ids, return_inverse=True)
-        self.tax = pd.DataFrame({
-            "taxon_id": unique_taxa,
-        })
-        self.tax.reset_index(inplace=True)
-        self.tax.rename({"index": "spatial_class_id"}, inplace=True, axis=1)
-        self.leaf_tax = self.tax
-        self.num_leaf_taxa = len(self.tax)
-
->>>>>>> Stashed changes
-        self.spatial_train = pd.merge(
-            spatial_data,
-            self.tax,
-            how="left",
-            left_on="taxon_id",
-            right_on="taxon_id",
-        ) 
-
 
     def make_dataset_inat(self, basedir):
         basedir_path = Path(basedir)
@@ -305,12 +264,7 @@ class DiscretizedInatGeoModelDataset:
 
     def make_dataset(self):
         print("loading taxonomy and training data")
-        if self.config["dataset_type"] == "inat":
-            print("iNat-style dataset")
-            self.make_dataset_inat(self.config["dataset_dir"])
-        elif self.config["dataset_type"] == "sinr":
-            print("sinr-style dataset")
-            self.make_dataset_sinr(self.config["dataset_dir"])
+        self.make_dataset_inat(self.config["dataset_dir"])
 
         print("cleaning spatial training dataset")
         self._clean_spatial_dataset()
