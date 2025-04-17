@@ -187,17 +187,9 @@ class DiscretizedInatGeoModelTrainer:
             learning_rate = self.config["initial_lr"]
 
         fcnet = self._make_and_compile_model(
-<<<<<<< HEAD
-<<<<<<< Updated upstream
             learning_rate=learning_rate,
-            num_classes=num_leaf_taxa,
+            num_classes=num_classes,
             num_input_feats=5
-=======
-            learning_rate=learning_rate, num_classes=num_classes, num_input_feats=5
->>>>>>> Stashed changes
-=======
-            learning_rate=learning_rate, num_classes=num_leaf_taxa, num_input_feats=5
->>>>>>> e7abb63 (organize imports)
         )
 
         callbacks = [

@@ -250,53 +250,6 @@ class DiscretizedInatGeoModelDataset:
                 writer.write(example.SerializeToString())
             writer.close()
 
-    def make_dataset_sinr(self, basedir):
-        basedir_path = Path(basedir)
-        data_file = basedir_path / "geo_prior_train.parquet"
-<<<<<<< Updated upstream
-
-        self.tax = pd.read_json(tax_file)
-        self.tax.reset_index(inplace=True)
-        self.tax.rename(
-            {
-                "index": "spatial_class_id",
-            },
-            inplace=True,
-            axis=1,
-        )
-        self.leaf_tax = self.tax
-        self.num_leaf_taxa = len(self.tax)
-
-        self.spatial_train = pd.read_parquet(data_file)
-<<<<<<< HEAD
-       
-=======
-        spatial_data = pd.read_parquet(
-            data_file,
-            columns=["longitude", "latitude", "taxon_id"]
-        )
-        taxon_ids = spatial_data["taxon_id"].values.astype(int)
-        unique_taxa, class_ids = np.unique(taxon_ids, return_inverse=True)
-        self.tax = pd.DataFrame({
-            "taxon_id": unique_taxa,
-        })
-        self.tax.reset_index(inplace=True)
-        self.tax.rename({"index": "spatial_class_id"}, inplace=True, axis=1)
-        self.leaf_tax = self.tax
-        self.num_leaf_taxa = len(self.tax)
-
->>>>>>> Stashed changes
-=======
-
->>>>>>> e7abb63 (organize imports)
-        self.spatial_train = pd.merge(
-            spatial_data,
-            self.tax,
-            how="left",
-            left_on="taxon_id",
-            right_on="taxon_id",
-        )
-
     def make_dataset_inat(self, basedir):
         basedir_path = Path(basedir)
         data_file = basedir_path / "spatial_data.parquet"
@@ -306,10 +259,7 @@ class DiscretizedInatGeoModelDataset:
         self.leaf_tax = self.tax[~self.tax.leaf_class_id.isna()]
         self.num_leaf_taxa = len(self.leaf_tax)
         self.spatial_train = pd.read_parquet(data_file)
-<<<<<<< HEAD
         
-=======
->>>>>>> e7abb63 (organize imports)
 
     def make_dataset(self):
         print("loading taxonomy and training data")

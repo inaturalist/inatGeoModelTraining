@@ -16,8 +16,6 @@ from lib.geo_dataset_maker import DiscretizedInatGeoModelDataset
 
 def main():
     params = {
-        "dataset_type": "inat", # inat or sinr
-        "dataset_type": "inat",  # inat or sinr
         "dataset_dir": "/disk/mnt/data/exports/vision-export-20241206190125-aka-small-2.0",
         "export_short_version": "small-2",
         "train_only_cid_data": True,
@@ -25,7 +23,7 @@ def main():
         "h3_resolution": 6,
         "num_random_samples": 100_000,
         "elevation_file": "/home/alex/elevation_h3_resolution6.csv",
-        "experiment_dir": "/data-ssd/alex/experiments/geo_prior_tf/2_20_grid/",
+        "experiment_dir": "/disk/mnt/data/experiments/geo_prior_tf/small_two",
         "batch_size": 1024,
         "num_epochs": 200,
         "initial_lr": 0.0005,
@@ -45,6 +43,13 @@ def main():
         params["dataset_dir"],
         "geo_spatial_grid_datasets",
         filename
+    )
+
+    params["tfrecord_file"] = (
+        params["dataset_dir"]
+        + "/"
+        + "geo_spatial_grid_datasets/"
+        + f"r{params['h3_resolution']}_elevation_empty_cells.tf"
     )
 
     ds = DiscretizedInatGeoModelDataset(config=params)
