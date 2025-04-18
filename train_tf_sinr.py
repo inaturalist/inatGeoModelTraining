@@ -25,10 +25,6 @@ from lib.data.data_loader import (
 
 
 @tf.function
-def neg_log(x):
-    return -tf.math.log(x + 1e-5)
-
-
 def apply_gradient(optimizer, model, x, ys, fake_x, pos_weight):
     with tf.GradientTape() as tape:
         # make predictions for the true training data
@@ -119,6 +115,8 @@ def train_model(config_file):
         staircase=True,
     )
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+    
+    pos_weight = tf.constant(config["sinr_hyperparams"]["pos_weight"], dtype=tf.float32)
 
     for epoch in range(config["num_epochs"]):
         print(f"Epoch {epoch+1}")
@@ -152,7 +150,7 @@ def train_model(config_file):
                 x_batch_train,
                 y_batch_train,
                 rand_loc,
-                config["sinr_hyperparams"]["pos_weight"],
+                pos_weight
             )
 
             global_step = (epoch * num_train_steps_per_epoch) + step

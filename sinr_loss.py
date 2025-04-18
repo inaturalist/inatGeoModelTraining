@@ -18,7 +18,7 @@ def sinr_loss(y_true, yhat, yhat_bg, pos_weight, alpha=1.0):
     """
 
     loss_pos = neg_log(1.0 - yhat)
-    inds = tf.constant(range(len(y_true)), dtype="int64")
+    inds = tf.range(tf.shape(y_true)[0], dtype=tf.int64)
     inds = tf.stack([inds, y_true], axis=1)
     pos_preds = tf.gather_nd(yhat, inds)
 
