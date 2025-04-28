@@ -9,6 +9,7 @@ from .geo_model_net import ResLayer
 
 class TFGeoPriorModel:
     def __init__(self, model_path):
+        self.model_path = model_path
         self.model = tf.keras.models.load_model(
             model_path, custom_objects={"ResLayer": ResLayer}, compile=False
         )
