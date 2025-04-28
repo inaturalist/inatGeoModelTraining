@@ -161,5 +161,5 @@ cython_debug/
 wandb/
 config.yml
 *.yml
-models/
+saved_models/
 elevation_h3_resolution6.csv
