@@ -17,15 +17,13 @@ Supported strategies:
 Outputs:
     CSV with columns: taxon_id, threshold_type, threshold_value
 """
-
-import yaml
-
 import click
 import h3
 import h3pandas
 import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
+import yaml
 
 from lib.models.tf_gp_model import TFGeoPriorModel
 from lib.models.encoders import CoordEncoder
