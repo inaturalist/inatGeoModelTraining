@@ -59,12 +59,30 @@ def make_thresholds(train_config_file, thresholding_strategy, fixed_threshold, l
     else:
         raster = None
     encoder = CoordEncoder(train_config.get("inputs").get("loc_feat_encoding"), raster)
-    tax = pd.read_csv(train_config.get("inat_dataset").get("taxonomy_data"))
+
+    if train_config.get("dataset_type") == "inat":
+        train_dataset = train_config.get("inat_dataset")
+    elif train_config.get("dataset_type") == "sinr":
+        train_dataset = train_config.get("sinr_dataset")
+    else:
+        raise NotImplementedError(f"{train_config.get('dataset_type')} dataset type not implemented yet.")
+
+    tax = pd.read_csv(train_dataset.get("taxonomy_data"))
 
     # load training data
     if thresholding_strategy in ["lpt", "lpt_r", "scott_pa"]:
         print("loading spatial training data...")
-        spatial_train = pd.read_parquet(train_config.get("inat_dataset").get("spatial_data"))
+        spatial_train = pd.read_parquet(train_dataset.get("spatial_data"))
+        if train_config.get("dataset_type") == "sinr":
+            # we need to manually add the leaf_class_id column in spatial_train
+            print("adding leaf_class_id to sinr style spatial data dataset")
+            spatial_train = pd.merge(
+                spatial_train,
+                tax[["taxon_id", "leaf_class_id"]],
+                left_on="taxon_id",
+                right_on="taxon_id",
+                how="left",
+            )
        
         print("discretizing spatial training data at resolution 4...") 
         spatial_train_h3 = spatial_train.h3.geo_to_h3(
