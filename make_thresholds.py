@@ -41,7 +41,7 @@ def make_thresholds(train_config_file, thresholding_strategy, fixed_threshold, l
     assert thresholding_strategy in valid_thresholding_strats, f"unsupported thresholding strategy {thresholding_strategy}, supported techniques are {valid_thresholding_strats}"
 
     if thresholding_strategy == "lpt_r":
-        assert lpt_r_percentile is not None, f"if using lpt-r, a percentile is required"
+        assert lpt_r_percentile is not None, "if using lpt-r, a percentile is required"
     
     with open(train_config_file, "r") as f:
         train_config = yaml.safe_load(f)
