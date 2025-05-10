@@ -50,12 +50,12 @@ def make_thresholds(train_config_file, thresholding_strategy, fixed_threshold, l
     print("loading model, encoder, taxonomy...")
     model = TFGeoPriorModel(train_config.get("model_save_name"))
 
-    if config.get("inputs").get("covariates") == "env":
-        assert config.get("bioclim_data") is not None, "if using env, need bioclim data"
-        raster = np.load(config.get("bioclim_data")).astype(np.float32)
-    elif config.get("inputs").get("covariates") == "elev":
-        assert config.get("elev_data") is not None, "if using elev, need elevation data"
-        raster = np.load(config.get("elev_data")).astype(np.float32)
+    if train_config.get("inputs").get("covariates") == "env":
+        assert train_config.get("bioclim_data") is not None, "if using env, need bioclim data"
+        raster = np.load(train_config.get("bioclim_data")).astype(np.float32)
+    elif train_config.get("inputs").get("covariates") == "elev":
+        assert train_config.get("elev_data") is not None, "if using elev, need elevation data"
+        raster = np.load(train_config.get("elev_data")).astype(np.float32)
     else:
         raster = None
     encoder = CoordEncoder(train_config.get("inputs").get("loc_feat_encoding"), raster)
