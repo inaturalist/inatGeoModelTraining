@@ -7,7 +7,7 @@ Usage:
     python run_eval.py \
         --train_config_file configs/config_train_inat_2_21.yaml \
         --thresholds_file thresholds/thresh_inat_2_21_lpt_5.csv \
-        --thresh_value_coluname threshold_value \
+        --thresh_value_colname threshold_value \
         --eval_dataset iucn \
         --iucn_file ~/sinr/data/eval/iucn/iucn_res_5.json \
         --output_path results/eval_inat_2_21_lpt_5_iucn.csv
@@ -51,7 +51,7 @@ def load_iucn_ranges(iucn_range_path):
 @click.option("--iucn_file", type=click.Path(exists=True), required=False, help="Path to iUCN dataset json file.")
 @click.option("--max_taxa", type=int, required=False, help="Optional: limit number of taxa for debugging.")
 @click.option("--output_path", type=click.Path(), required=True, help="Where to save per-taxon evaluation results.")
-def run_eval(train_config_file, thresholds_file, thresh_val_colname, eval_dataset, iucn_file, max_taxa, output_path):
+def run_eval(train_config_file, thresholds_file, thresh_value_colname, eval_dataset, iucn_file, max_taxa, output_path):
     with open(train_config_file, "r") as f:
         train_config = yaml.safe_load(f)
 
@@ -97,7 +97,7 @@ def run_eval(train_config_file, thresholds_file, thresh_val_colname, eval_datase
                 continue
 
             threshold = thresholds[thresholds.taxon_id == taxon_id].iloc[0]
-            taxon_threshold = threshold[thresh_val_colname]
+            taxon_threshold = threshold[thresh_value_colname]
             
             leaf_taxon = leaf_tax[leaf_tax.taxon_id==taxon_id].iloc[0]
             target_class_id = int(leaf_taxon.leaf_class_id)
