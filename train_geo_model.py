@@ -33,8 +33,6 @@ def main():
         "wandb_project": "geomodel_tf",
         "inner_nodes": False,
     }
-
-    params["tfrecord_file"] = params["dataset_dir"] + "/" + "geo_spatial_grid_datasets/" + f"r{params['h3_resolution']}_elevation_empty_cells.tf"
     
     if params["inner_nodes"]:
         filename = f"r{params['h3_resolution']}_empty_cells_with_elevation_inner_nodes_duckdb.tf"

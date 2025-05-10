@@ -8,10 +8,9 @@ import wandb
 from wandb.integration.keras import WandbMetricsLogger
 import pandas as pd
 import tensorflow as tf
-import numpy as np 
+import numpy as np
 
-from lib.geo_model_net import make_geo_model_net
-
+from .models.geo_model_net import make_geo_model_net
 
 class LRLogger(tf.keras.callbacks.Callback):
     def get_current_learning_rate(self):
@@ -24,13 +23,13 @@ class LRLogger(tf.keras.callbacks.Callback):
     def on_batch_end(self, batch, logs):
         lr = self.get_current_learning_rate()
 
-
     def on_epoch_end(self, epoch, logs):
         lr = self.get_current_learning_rate()
         print("epoch {}, lr {}".format(epoch, lr))
         if lr == None:
             lr = 0.0
         wandb.log({"lr": lr}, commit=False)
+
 
 def _lr_scheduler(epoch, lr):
     if epoch < 30:
@@ -100,7 +99,9 @@ class DiscretizedInatGeoModelTrainer:
 
     def _make_and_compile_model(self, learning_rate, num_classes, num_input_feats):
 
-        fcnet = make_geo_model_net(num_classes=num_classes, num_input_feats=num_input_feats)
+        fcnet = make_geo_model_net(
+            num_classes=num_classes, num_input_feats=num_input_feats
+        )
         optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=learning_rate)
         bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 
@@ -108,7 +109,7 @@ class DiscretizedInatGeoModelTrainer:
             optimizer=optimizer,
             loss=bce,
             metrics=[
-                "Precision", 
+                "Precision",
                 "Recall",
                 tf.keras.metrics.AUC(curve="PR", name="prauc"),
                 tf.keras.metrics.TruePositives(),
@@ -119,14 +120,16 @@ class DiscretizedInatGeoModelTrainer:
         return fcnet
 
     def train_geomodel(self):
-        wandb.init(
-            project=self.config["wandb_project"],
-            config=self.config
-        )
+        wandb.init(project=self.config["wandb_project"], config=self.config)
 
-        train_data_dir = Path(self.config["dataset_dir"])
-        tax = pd.read_csv(train_data_dir / "taxonomy.csv")
-        leaf_tax = tax[~tax.leaf_class_id.isna()]
+        if self.config["dataset_type"] == "sinr":
+            sinr_train_data_dir = Path(self.config["dataset_dir"])
+            tax = pd.read_json(sinr_train_data_dir / "geo_prior_train_meta.json")
+            leaf_tax = tax
+        elif self.config["dataset_type"] == "inat":
+            train_data_dir = Path(self.config["dataset_dir"])
+            tax = pd.read_csv(train_data_dir / "taxonomy.csv")
+            leaf_tax = tax[~tax.leaf_class_id.isna()]
 
         num_leaf_taxa = len(leaf_tax)
         num_taxa = len(tax)
@@ -172,19 +175,19 @@ class DiscretizedInatGeoModelTrainer:
         print("{} warmup steps".format(warmup_steps))
         print("{} decay steps".format(decay_steps))
 
-        if self.config.get("lr_warmup_cosine_decay"):	
+        if self.config.get("lr_warmup_cosine_decay"):
             learning_rate = tf.keras.optimizers.schedules.CosineDecay(
                 initial_learning_rate=1e-7,
                 decay_steps=decay_steps,
                 warmup_target=self.config["initial_lr"],
-                warmup_steps=warmup_steps
+                warmup_steps=warmup_steps,
             )
         else:
             learning_rate = self.config["initial_lr"]
 
         fcnet = self._make_and_compile_model(
-            learning_rate=learning_rate, 
-            num_classes=num_classes, 
+            learning_rate=learning_rate,
+            num_classes=num_classes,
             num_input_feats=5
         )
 
@@ -196,9 +199,7 @@ class DiscretizedInatGeoModelTrainer:
 
         if not self.config.get("lr_warmup_cosine_decay"):
             callbacks.append(
-                tf.keras.callbacks.LearningRateScheduler(
-                    _lr_scheduler, verbose=1
-                )
+                tf.keras.callbacks.LearningRateScheduler(_lr_scheduler, verbose=1)
             )
 
         history = fcnet.fit(
