@@ -12,7 +12,6 @@ import numpy as np
 
 from .models.geo_model_net import make_geo_model_net
 
-
 class LRLogger(tf.keras.callbacks.Callback):
     def get_current_learning_rate(self):
         if callable(self.model.optimizer.learning_rate):

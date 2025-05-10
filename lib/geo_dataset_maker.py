@@ -263,12 +263,7 @@ class DiscretizedInatGeoModelDataset:
 
     def make_dataset(self):
         print("loading taxonomy and training data")
-        if self.config["dataset_type"] == "inat":
-            print("iNat-style dataset")
-            self.make_dataset_inat(self.config["dataset_dir"])
-        elif self.config["dataset_type"] == "sinr":
-            print("sinr-style dataset")
-            self.make_dataset_sinr(self.config["dataset_dir"])
+        self.make_dataset_inat(self.config["dataset_dir"])
 
         print("cleaning spatial training dataset")
         self._clean_spatial_dataset()

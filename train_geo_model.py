@@ -16,14 +16,14 @@ from lib.geo_dataset_maker import DiscretizedInatGeoModelDataset
 
 def main():
     params = {
-        "dataset_dir": "/disk/mnt/data/exports/vision-export-20241206190125-aka-small-2.0",
-        "export_short_version": "small-2",
+        "dataset_dir": "/disk/mnt/data/exports/vision-export-20250216070017-aka-2.21",
+        "export_short_version": "2_21_grid",
         "train_only_cid_data": True,
         "train_only_wild_data": False,
         "h3_resolution": 6,
         "num_random_samples": 100_000,
-        "elevation_file": "/home/alex/elevation_h3_resolution6.csv",
-        "experiment_dir": "/disk/mnt/data/experiments/geo_prior_tf/small_two",
+        "elevation_file": "elevation_h3_resolution6.csv",
+        "experiment_dir": "/disk/mnt/data/experiments/geo_prior_tf/2_21_grid/",
         "batch_size": 1024,
         "num_epochs": 200,
         "initial_lr": 0.0005,
@@ -43,13 +43,6 @@ def main():
         params["dataset_dir"],
         "geo_spatial_grid_datasets",
         filename
-    )
-
-    params["tfrecord_file"] = (
-        params["dataset_dir"]
-        + "/"
-        + "geo_spatial_grid_datasets/"
-        + f"r{params['h3_resolution']}_elevation_empty_cells.tf"
     )
 
     ds = DiscretizedInatGeoModelDataset(config=params)
