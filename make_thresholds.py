@@ -72,7 +72,7 @@ def make_thresholds(train_config_file, thresholding_strategy, fixed_threshold, l
     # load training data
     if thresholding_strategy in ["lpt", "lpt_r", "scott_pa"]:
         print("loading spatial training data...")
-        spatial_train = pd.read_parquet(train_dataset.get("spatial_data"))
+        spatial_train = pd.read_parquet(train_dataset.get("train_data"))
         if train_config.get("dataset_type") == "sinr":
             # we need to manually add the leaf_class_id column in spatial_train
             print("adding leaf_class_id to sinr style spatial data dataset")
