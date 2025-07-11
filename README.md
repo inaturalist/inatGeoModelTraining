@@ -20,3 +20,9 @@
 #### Converting to SINR
 
 We are converting from discretized & gridded training to following [the SINR approach](https://arxiv.org/abs/2306.02564).
+
+
+#### Tests
+
+$ `pytest` runs 'em.
+
