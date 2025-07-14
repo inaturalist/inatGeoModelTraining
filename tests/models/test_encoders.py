@@ -14,7 +14,7 @@ elev_raster = np.random.random((2160, 4320, 1)).astype(np.float32)
     ("sinusoidal", elev_raster, 5),
     ("sinusoidal_hd", elev_raster, 15),
 ])
-def test_coord_encoder_input_feats(strategy, raster, expected_feats):
+def test_coord_encoder_input_num_feats(strategy, raster, expected_feats):
     encoder = encoders.CoordEncoder(strategy, raster)
     assert encoder.num_input_feats() == expected_feats
 
