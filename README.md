@@ -20,7 +20,8 @@ $ `python train.py <path_to_config.yml>`
 
 ## Eval
 
-To run the sinr paper evals, you can use:
+These evals are designed to mostly match the evaluations done for the SINR paper.
+
 $ `python sinr_paper_evals.py <path_to_config.yml>`
 
 ### Tests
