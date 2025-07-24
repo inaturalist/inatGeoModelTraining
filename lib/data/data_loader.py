@@ -118,7 +118,8 @@ def load_inat_dataset_from_parquet_h3(spatial_data_file, h3_resolution):
     return locs, class_ids, unique_taxa, h3_idx
 
 
-def load_inat_dataset_from_parquet(spatial_data_file):
+
+def load_inat_dataset_from_parquet(spatial_data_file, inner_nodes):
     print("inat style dataset")
     print(" reading parquet")
     spatial_data = pd.read_parquet(
@@ -131,7 +132,13 @@ def load_inat_dataset_from_parquet(spatial_data_file):
             "spatial_class_id",
         ],
     )
-    spatial_data = spatial_data.dropna(subset="leaf_class_id")
+
+    if not inner_nodes:
+        spatial_data = spatial_data.dropna(subset="leaf_class_id")
+
+    # we won't need this anymore
+    _ = spatial_data.pop("leaf_class_id")
+
     print(" cleaning dataset")
     spatial_data = clean_dataset(spatial_data)
     print(" shuffling")
