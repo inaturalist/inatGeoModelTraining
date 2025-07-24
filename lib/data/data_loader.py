@@ -119,7 +119,7 @@ def load_inat_dataset_from_parquet_h3(spatial_data_file, h3_resolution):
 
 
 
-def load_inat_dataset_from_parquet(spatial_data_file, inner_nodes):
+def load_inat_dataset_from_parquet(spatial_data_file, inner_nodes=False):
     print("inat style dataset")
     print(" reading parquet")
     spatial_data = pd.read_parquet(
