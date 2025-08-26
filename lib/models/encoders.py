@@ -57,9 +57,9 @@ class CoordEncoder:
     def _encode_loc_sinusoidal_hd(self, loc_ip, concat_dim=1):
         # assumes inputs location are in range -1 to 1
         # location is lon, lat
-    
-        lat = tf.expand_dims(loc_ip[:,0], 1)
-        lng = tf.expand_dims(loc_ip[:,1], 1)
+
+        lng = tf.expand_dims(loc_ip[:,0], 1)
+        lat = tf.expand_dims(loc_ip[:,1], 1)
 
         feats = tf.concat([
             lng,
