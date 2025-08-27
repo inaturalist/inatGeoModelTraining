@@ -24,6 +24,10 @@ These evals are designed to mostly match the evaluations done for the SINR paper
 
 $ `python sinr_paper_evals.py <path_to_config.yml>`
 
+## Export
+
+`export_coreml_geomodel.py` converts to coreml for iOS deployment, `export_tflite_geomodel.py` converts to tflite for android deployment.
+
 ### Tests
 
 $ `pytest` runs 'em.
