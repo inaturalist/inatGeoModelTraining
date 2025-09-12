@@ -163,3 +163,7 @@ config.yml
 *.yml
 saved_models/
 elevation_h3_resolution6.csv
+thresholds/
+maps/
+sinr_data_eval/
+evals/

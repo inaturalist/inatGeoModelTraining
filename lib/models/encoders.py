@@ -84,6 +84,60 @@ class CoordEncoder:
 
         return feats
 
+    def _bilinear_interpolate_new(self, loc_ip, data, remove_nans_raster=True):
+        """
+        Perform bilinear interpolation on a raster using normalized [-1, 1] lon/lat input.
+
+        Args:
+            loc_ip (tf.Tensor): [N x 2] tensor of [lon, lat] in [-1, 1] space.
+            data (np.ndarray): [H x W x C] raster data.
+            remove_nans_raster (bool): Whether to replace NaNs in `data` with 0.0.
+
+        Returns:
+            np.ndarray: [N x C] interpolated features for each location.
+        """
+        assert data is not None
+        assert loc_ip.shape[1] == 2
+
+        if remove_nans_raster:
+            data = np.nan_to_num(data, nan=0.0)
+
+        # Normalize from [-1, 1] to [0, 1]
+        loc = (loc_ip + 1.0) / 2.0
+
+        # Flip Y-axis for raster top-down layout
+        x = loc[:, 0]
+        y = 1.0 - loc[:, 1]
+
+        # Convert to pixel indices
+        px = x * (data.shape[1] - 1)
+        py = y * (data.shape[0] - 1)
+
+        # Corner integer indices
+        x0 = tf.floor(px).numpy().astype(int)
+        y0 = tf.floor(py).numpy().astype(int)
+        x1 = np.clip(x0 + 1, 0, data.shape[1] - 1)
+        y1 = np.clip(y0 + 1, 0, data.shape[0] - 1)
+
+        # Deltas for interpolation
+        dx = np.expand_dims(px - x0, axis=1)
+        dy = np.expand_dims(py - y0, axis=1)
+
+        # Fetch corner values
+        top_left     = data[y0, x0, :]
+        top_right    = data[y0, x1, :]
+        bottom_left  = data[y1, x0, :]
+        bottom_right = data[y1, x1, :]
+
+        # Bilinear interpolation
+        interp = (
+            top_left * (1 - dx) * (1 - dy) +
+            top_right * dx * (1 - dy) +
+            bottom_left * (1 - dx) * dy +
+            bottom_right * dx * dy
+        )
+
+        return interp
 
     def _bilinear_interpolate(self, loc_ip, data, remove_nans_raster=True):
         # this is almost entirely exactly from the sinr paper source

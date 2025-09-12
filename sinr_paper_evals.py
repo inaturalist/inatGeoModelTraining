@@ -15,12 +15,15 @@ from lib.eval.geo_prior_eval import EvaluatorGeoPrior
 from lib.eval.geo_feat_eval import EvaluatorGeoFeatures
 
 
-def load_class_to_taxa_inat_dataset(taxonomy):
+def load_class_to_taxa_inat_dataset(taxonomy, inner_nodes=False):
     tax = pd.read_csv(taxonomy)
-    leaf_tax = tax[~tax.leaf_class_id.isna()]
-    leaf_tax = leaf_tax.sort_values("spatial_class_id")
-    class_to_taxa = leaf_tax["taxon_id"].values.astype(int)
-    return class_to_taxa
+    if inner_nodes:
+        tax = tax.sort_values("spatial_class_id")
+        return tax["taxon_id"].values.astype(int)
+    else:
+        leaf_tax = tax[~tax.leaf_class_id.isna()]
+        leaf_tax = leaf_tax.sort_values("leaf_class_id")
+        return leaf_tax["taxon_id"].values.astype(int)
 
 
 def load_class_to_taxa_sinr_dataset(file):
