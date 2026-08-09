@@ -68,7 +68,7 @@ def train_model(config_file):
             )
         elif config["dataset_type"] == "inat":
             (locs, class_ids, unique_taxa) = load_inat_dataset_from_parquet(
-                config["inat_dataset"]["spatial_data"]
+                config["inat_dataset"]["spatial_data"], config["inner_nodes"]
             )
 
     if config["inputs"]["covariates"] == "env":
