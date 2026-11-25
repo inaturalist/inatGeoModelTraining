@@ -3,6 +3,7 @@
 #
 #   cd /disk/mnt/data/experiments/geo_prior_tf/X_YY_grid
 #   python3 /disk/mnt/data/repos/inatGeoModelTraining/train_geo_model.py --config_file config_X_YY_grid.yml
+#   python3 /disk/mnt/data/repos/inatGeoModelTraining/evaluate_geo_model.py --config_file config_X_YY_grid.yml
 
 dataset_dir: "/disk/mnt/data/exports/vision-export-YYYYMMDDHHMMSS-aka-X.YY"
 export_short_version: "X_YY_grid"
@@ -24,3 +25,10 @@ shuffle_buffer_size: 50000
 full_shuffle_before_tfrecords: False
 
 wandb_project: "geomodel_tf"
+
+# read by evaluate_geo_model.py (thresholds, then taxon range evaluation)
+eval:
+  taxon_range_eval_dir: "/disk/mnt/data/exports/taxon_range_eval-YYYYMMDDHHMMSS-vision-export-YYYYMMDDHHMMSS-aka-X.YY"
+  elevation_tif: "/disk/mnt/data/repos/inatVisionAPI/wc2.1_5m_elev.tif"
+  # not the training h3_resolution above
+  h3_resolution: 4
