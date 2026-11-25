@@ -10,31 +10,19 @@ import tensorflow as tf
 import time
 import uuid
 
+import click
+import yaml
+
 from lib.geo_model_trainer import DiscretizedInatGeoModelTrainer
 from lib.geo_dataset_maker import DiscretizedInatGeoModelDataset
 
 
-def main():
-    params = {
-        "dataset_dir": "/disk/mnt/data/exports/vision-export-20260517100008-aka-2.32",
-        "export_short_version": "2_32_grid",
-        "train_only_cid_data": True,
-        "train_only_wild_data": False,
-        "h3_resolution": 6,
-        "num_random_samples": 100_000,
-        "elevation_file": "elevation_h3_resolution6.csv",
-        "experiment_dir": "/disk/mnt/data/experiments/geo_prior_tf/2_32_grid/",
-        "batch_size": 1024,
-        "num_epochs": 200,
-        "initial_lr": 0.0005,
-        "shuffle_buffer_size": 50_000,
-        "full_shuffle_before_tfrecords": False,
-        "lr_warmup_cosine_decay": True,
-        "wandb_project": "geomodel_tf",
-        "inner_nodes": False,
-        "dataset_type": "inat",
-    }
-    
+@click.command()
+@click.option("--config_file", required=True)
+def main(config_file):
+    with open(config_file, "r") as f:
+        params = yaml.safe_load(f)
+
     if params["inner_nodes"]:
         filename = f"r{params['h3_resolution']}_empty_cells_with_elevation_inner_nodes_duckdb.tf"
     else:
